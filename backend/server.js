@@ -63,6 +63,51 @@ app.get('/konyvek/hosszuak', (req, res) => {
     })
 });
 
+//beszúrás
+app.post('/konyvek', (req, res) => {
+    const { cim, kiadasi_ev, oldalszam, mufaj_id, kolcsonozheto } = req.body;
+
+    pool.query(
+        'INSERT INTO konyvek (cim, kiadasi_ev, oldalszam, mufaj_id, kolcsonozheto) VALUES (?, ?, ?, ?, ?)',
+        [cim, kiadasi_ev, oldalszam, mufaj_id, kolcsonozheto],
+        (err, result) => {
+            if (err) {
+                return res.status(500).json({ hiba: err });
+            }
+
+            res.status(201).json({
+                uzenet: 'Sikeres könyvbeszúrás!',
+                id: result.insertId
+            });
+        }
+    );
+});
+
+//torles
+app.delete('/konyvek/:id', (req, res) => {
+    const id = req.params.id;
+
+    pool.query(
+        'DELETE FROM konyvek WHERE id = ?',
+        [id],
+        (err, result) => {
+            if (err) {
+                return res.status(500).json({ hiba: err });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    uzenet: 'Nem található ilyen könyv!'
+                });
+            }
+
+            res.status(200).json({
+                uzenet: 'Sikeres törlés!'
+            });
+        }
+    );
+});
+
 const PORT = process.env.PORT || 8080;
 
 
